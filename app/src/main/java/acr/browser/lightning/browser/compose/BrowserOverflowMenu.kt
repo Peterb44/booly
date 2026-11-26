@@ -31,7 +31,6 @@ import androidx.compose.ui.window.PopupProperties
 fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserComposeState) {
     Box {
         var dropDownExpanded by remember { mutableStateOf(false) }
-        var videoSearchDialog by remember { mutableStateOf(false) }
         IconButton(onClick = {
             dropDownExpanded = !dropDownExpanded
         }) {
@@ -130,13 +129,7 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                     dropDownExpanded = false
                 }
             )
-            DropdownMenuItem(
-                text = { DropdownText("بحث فيديو") },
-                onClick = {
-                    dropDownExpanded = false
-                    videoSearchDialog = true
-                }
-            )
+
             // Keep Ad Block available in the overflow menu and open the existing
             // dedicated ad-block settings screen when selected.
             DropdownMenuItem(
@@ -156,41 +149,7 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                 )
             }
         }
-        if (videoSearchDialog) {
-            AlertDialog(
-                onDismissRequest = { videoSearchDialog = false },
-                title = { Text("بحث فيديو") },
-                text = {
-                    androidx.compose.foundation.layout.Column(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
-                    ) {
-                        listOf(
-                            "YouTube" to "https://www.youtube.com/results?search_query=",
-                            "Google Videos" to "https://www.google.com/search?tbm=vid&q=",
-                            "Bing Videos" to "https://www.bing.com/videos/search?q=",
-                            "DuckDuckGo Videos" to "https://duckduckgo.com/?iax=videos&ia=videos&q=",
-                            "Dailymotion" to "https://www.dailymotion.com/search/",
-                            "Vimeo" to "https://vimeo.com/search?q=",
-                            "Odysee" to "https://odysee.com/\$/search?q=",
-                            "Rumble" to "https://rumble.com/search/video?q=",
-                            "Bilibili" to "https://search.bilibili.com/all?keyword=",
-                            "Twitch" to "https://www.twitch.tv/search?term="
-                        ).forEach { (name, url) ->
-                            TextButton(
-                                onClick = {
-                                    presenter.selectGameSearchEngine(url)
-                                    videoSearchDialog = false
-                                }
-                            ) { Text(name) }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { videoSearchDialog = false }) { Text("إغلاق") }
-                }
-            )
-        }
-    }
+
 }
 
 @Composable
