@@ -26,7 +26,7 @@ import acr.browser.lightning.settings.licenses.DefaultDependenciesRepository
 import acr.browser.lightning.settings.licenses.DependenciesRepository
 import acr.browser.lightning.settings.navigation.DefaultSettingsNavigator
 import acr.browser.lightning.settings.navigation.SettingsNavigator
-import acr.browser.lightning.ssl.SessionSslWarningPreferences
+import acr.browser.lightning.ssl.PersistentSslWarningPreferences
 import acr.browser.lightning.ssl.SslWarningPreferences
 import acr.browser.lightning.useragent.DefaultUserAgentProvider
 import acr.browser.lightning.useragent.UserAgentProvider
@@ -55,7 +55,7 @@ interface AppBindsModule {
     fun bindsAllowListModel(sessionAllowListModel: SessionAllowListModel): AllowListModel
 
     @Binds
-    fun bindsSslWarningPreferences(sessionSslWarningPreferences: SessionSslWarningPreferences): SslWarningPreferences
+    fun bindsSslWarningPreferences(persistentSslWarningPreferences: PersistentSslWarningPreferences): SslWarningPreferences
 
     @Binds
     fun bindsHostsRepository(hostsDatabase: HostsDatabase): HostsRepository
