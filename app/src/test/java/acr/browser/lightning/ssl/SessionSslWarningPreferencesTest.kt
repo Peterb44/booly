@@ -20,7 +20,7 @@ class SessionSslWarningPreferencesTest {
 
     @Before
     fun setUp() {
-        val context = RuntimeEnvironment.getApplication<Context>()
+        val context: Context = RuntimeEnvironment.getApplication()
         context.getSharedPreferences("ssl_site_decisions", Context.MODE_PRIVATE)
             .edit().clear().commit()
         preferences = PersistentSslWarningPreferences(context)
