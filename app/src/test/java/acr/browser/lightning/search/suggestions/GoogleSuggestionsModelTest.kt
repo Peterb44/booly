@@ -36,7 +36,7 @@ class GoogleSuggestionsModelTest {
 
         (0..100).forEach {
             val result =
-                "https://suggestqueries.google.com/complete/search?output=toolbar&hl=$it&q=$it"
+                "https://suggestqueries.google.com/complete/search?output=chrome&hl=$it&q=$it"
 
             assertThat(suggestionsModel.createQueryUrl(it.toString(), it.toString())).isEqualTo(
                 result.toHttpUrlOrNull()
