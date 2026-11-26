@@ -81,4 +81,5 @@
     <string name="folder_default">الافتراضي</string>
     <string name="folder_custom">مخصص</string>
     <string name="search_engine_video">بحث فيديو</string>
+    <string name="ssl_warning_dont_ask_again">لا تسأل مرة أخرى عن هذا الموقع</string>
 </resources>
