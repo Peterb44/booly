@@ -12,6 +12,7 @@ import acr.browser.lightning.search.engine.KagiSearch
 import acr.browser.lightning.search.engine.NaverSearch
 import acr.browser.lightning.search.engine.StartPageSearch
 import acr.browser.lightning.search.engine.YahooSearch
+import acr.browser.lightning.search.engine.VideoSearch
 import acr.browser.lightning.search.engine.YandexSearch
 import acr.browser.lightning.search.suggestions.BaiduSuggestionsModel
 import acr.browser.lightning.search.suggestions.DuckSuggestionsModel
@@ -57,6 +58,7 @@ class SearchEngineProvider @Inject constructor(
     suspend fun provideSearchEngine(): BaseSearchEngine =
         when (userPreferencesDataStore.searchChoice.get()) {
             SearchEngineChoice.CUSTOM -> CustomSearch(userPreferencesDataStore.searchUrl.get())
+            SearchEngineChoice.VIDEO -> VideoSearch()
             SearchEngineChoice.GOOGLE -> GoogleSearch()
             SearchEngineChoice.BING -> BingSearch()
             SearchEngineChoice.YAHOO -> YahooSearch()
@@ -74,6 +76,7 @@ class SearchEngineProvider @Inject constructor(
      */
     suspend fun provideAllSearchEngines(): List<BaseSearchEngine> = listOf(
         CustomSearch(userPreferencesDataStore.searchUrl.get()),
+        VideoSearch(),
         GoogleSearch(),
         BingSearch(),
         YahooSearch(),
