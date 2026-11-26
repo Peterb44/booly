@@ -906,11 +906,11 @@ class BrowserPresenter @Inject constructor(
                 state.updateSelf { copy(openBookmarks = false) }
             }
 
-            currentTab?.canGoBack() == true -> currentTab?.goBack()
-            // Close popup tabs first, including in incognito mode. Back must return
-            // to the page that opened the popup, never close the browser activity.
+            // A popup is a separate tab: Back closes it and returns to its opener,
+            // even if the popup itself has accumulated navigation history.
             currentTab?.tabType == TabModel.Type.POP_UP ->
                 onTabClose(state.value.tabs.indexOfCurrentTab())
+            currentTab?.canGoBack() == true -> currentTab?.goBack()
             currentTab?.canGoBack() == false -> if (incognitoMode) {
                 currentTab?.id?.let {
                     state.updateSelf { copy(dialog = BrowserViewState.Dialogs.CloseBrowser(it)) }
