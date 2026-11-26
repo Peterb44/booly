@@ -9,15 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,12 +31,6 @@ import androidx.compose.ui.window.PopupProperties
 fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserComposeState) {
     Box {
         var dropDownExpanded by remember { mutableStateOf(false) }
-        var searchEngineDialog by remember { mutableStateOf(false) }
-        var searchEngineNames by remember { mutableStateOf(emptyList<String>()) }
-        var selectedSearchEngine by remember { mutableStateOf(-1) }
-        var customSearchUrl by remember { mutableStateOf("") }
-        var customSearchDialog by remember { mutableStateOf(false) }
-        var gameSearchDialog by remember { mutableStateOf(false) }
         var videoSearchDialog by remember { mutableStateOf(false) }
         IconButton(onClick = {
             dropDownExpanded = !dropDownExpanded
@@ -140,24 +131,6 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                 }
             )
             DropdownMenuItem(
-                text = { DropdownText("محرك البحث") },
-                onClick = {
-                    dropDownExpanded = false
-                    presenter.loadSearchEngineOptions { names, selected ->
-                        searchEngineNames = names
-                        selectedSearchEngine = selected
-                        searchEngineDialog = true
-                    }
-                }
-            )
-            DropdownMenuItem(
-                text = { DropdownText("محركات البحث ٢") },
-                onClick = {
-                    dropDownExpanded = false
-                    gameSearchDialog = true
-                }
-            )
-            DropdownMenuItem(
                 text = { DropdownText("بحث فيديو") },
                 onClick = {
                     dropDownExpanded = false
@@ -182,64 +155,6 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                     }
                 )
             }
-        }
-        if (searchEngineDialog) {
-            AlertDialog(
-                onDismissRequest = { searchEngineDialog = false },
-                title = { Text("محرك البحث") },
-                text = {
-                    androidx.compose.foundation.lazy.LazyColumn {
-                        items(searchEngineNames.size) { index ->
-                            androidx.compose.material3.RadioButton(
-                                selected = selectedSearchEngine == index,
-                                onClick = {
-                                    selectedSearchEngine = index
-                                    if (index == 0) {
-                                        searchEngineDialog = false
-                                        customSearchDialog = true
-                                    } else {
-                                        presenter.selectSearchEngine(index)
-                                        searchEngineDialog = false
-                                    }
-                                }
-                            )
-                            Text(
-                                text = searchEngineNames[index],
-                                modifier = Modifier
-                            )
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { searchEngineDialog = false }) { Text("إغلاق") }
-                }
-            )
-        }
-        if (gameSearchDialog) {
-            AlertDialog(
-                onDismissRequest = { gameSearchDialog = false },
-                title = { Text("محركات البحث ٢") },
-                text = {
-                    androidx.compose.foundation.layout.Column {
-                        listOf(
-                            "Steam Store" to "https://store.steampowered.com/search/?term=",
-                            "GOG Games" to "https://www.gog.com/en/games?query=",
-                            "itch.io Games" to "https://itch.io/search?q=",
-                            "SearXNG" to "https://searx.be/search?q="
-                        ).forEach { (name, url) ->
-                            TextButton(
-                                onClick = {
-                                    presenter.selectGameSearchEngine(url)
-                                    gameSearchDialog = false
-                                }
-                            ) { Text(name) }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { gameSearchDialog = false }) { Text("إغلاق") }
-                }
-            )
         }
         if (videoSearchDialog) {
             AlertDialog(
@@ -272,29 +187,6 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                 },
                 confirmButton = {
                     TextButton(onClick = { videoSearchDialog = false }) { Text("إغلاق") }
-                }
-            )
-        }
-        if (customSearchDialog) {
-            AlertDialog(
-                onDismissRequest = { customSearchDialog = false },
-                title = { Text("محرك بحث مخصص") },
-                text = {
-                    OutlinedTextField(
-                        value = customSearchUrl,
-                        onValueChange = { customSearchUrl = it },
-                        label = { Text("رابط البحث") },
-                        singleLine = true
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        presenter.selectSearchEngine(0, customSearchUrl)
-                        customSearchDialog = false
-                    }) { Text("حفظ") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { customSearchDialog = false }) { Text("إلغاء") }
                 }
             )
         }
