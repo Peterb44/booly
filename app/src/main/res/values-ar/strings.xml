@@ -80,4 +80,5 @@
     <string name="action_forward">الأمام</string>
     <string name="folder_default">الافتراضي</string>
     <string name="folder_custom">مخصص</string>
+    <string name="search_engine_video">بحث فيديو</string>
 </resources>
