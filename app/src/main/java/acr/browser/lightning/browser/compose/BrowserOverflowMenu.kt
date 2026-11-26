@@ -149,7 +149,7 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                 )
             }
         }
-
+    }
 }
 
 @Composable
