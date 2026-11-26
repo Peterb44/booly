@@ -193,6 +193,11 @@ fun BrowserSearchSuggestions(
             )
         }
     ) {
+        // The expanded suggestions are hosted in a separate window. Resolve the IME
+        // controller and window token here so tapping a suggestion hides the correct keyboard.
+        val suggestionsKeyboardController = LocalSoftwareKeyboardController.current
+        val suggestionsFocusManager = LocalFocusManager.current
+        val suggestionsView = LocalView.current
         val suggestionResults = remember { suggestionsModel.results() }
         val suggestions = suggestionResults.collectAsState(emptyList())
         suggestions.value.forEach {
@@ -200,12 +205,19 @@ fun BrowserSearchSuggestions(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        // Close the on-screen keyboard as soon as a suggestion is selected.
-                        keyboardController?.hide()
+                        suggestionsKeyboardController?.hide()
+                        suggestionsFocusManager.clearFocus(force = true)
+                        (suggestionsView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                            ?.hideSoftInputFromWindow(suggestionsView.windowToken, 0)
                         presenter.onEvent(BrowserUiEvent.SearchSuggestionClick(it))
                         coroutineScope.launch {
                             searchBarState.animateToCollapsed()
                             presenter.onEvent(BrowserUiEvent.SearchBarExpandedOrCollapsed(expanded = false))
+                            // Hide again after navigation and the search-bar animation.
+                            kotlinx.coroutines.delay(120)
+                            suggestionsKeyboardController?.hide()
+                            (suggestionsView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
+                                ?.hideSoftInputFromWindow(suggestionsView.windowToken, 0)
                         }
                     }
             ) {
