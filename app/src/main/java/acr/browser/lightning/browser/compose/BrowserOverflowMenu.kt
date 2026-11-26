@@ -126,6 +126,13 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                 }
             )
             DropdownMenuItem(
+                text = { DropdownText("عرض سطح المكتب") },
+                onClick = {
+                    presenter.onEvent(BrowserUiEvent.ToggleDesktopAgentClick)
+                    dropDownExpanded = false
+                }
+            )
+            DropdownMenuItem(
                 text = { DropdownText(stringResource(R.string.action_bookmarks)) },
                 onClick = {
                     presenter.onEvent(BrowserUiEvent.MenuClick(MenuSelection.BOOKMARKS))
