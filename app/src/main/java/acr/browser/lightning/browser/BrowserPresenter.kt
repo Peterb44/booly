@@ -842,10 +842,17 @@ class BrowserPresenter @Inject constructor(
             // process of being removed.
             return
         }
-        val nextTab = state.value.tabs.nextSelected(index)
+        val closingTab = state.value.tabs[index]
+        // A popup is opened by the currently active page. When it is closed, return
+        // to the tab immediately before it (normally the page that opened the popup).
+        val nextTab = if (closingTab.isPopup && index > 0) {
+            state.value.tabs[index - 1]
+        } else {
+            state.value.tabs.nextSelected(index)
+        }
 
         val currentTabId = currentTab?.id
-        val needToSelectNextTab = state.value.tabs[index].id == currentTabId
+        val needToSelectNextTab = closingTab.id == currentTabId
 
         model.deleteTab(state.value.tabs[index].id)
         state.updateSelf { updateTabViewState() }
@@ -900,15 +907,15 @@ class BrowserPresenter @Inject constructor(
             }
 
             currentTab?.canGoBack() == true -> currentTab?.goBack()
+            // Close popup tabs first, including in incognito mode. Back must return
+            // to the page that opened the popup, never close the browser activity.
+            currentTab?.tabType == TabModel.Type.POP_UP ->
+                onTabClose(state.value.tabs.indexOfCurrentTab())
             currentTab?.canGoBack() == false -> if (incognitoMode) {
                 currentTab?.id?.let {
                     state.updateSelf { copy(dialog = BrowserViewState.Dialogs.CloseBrowser(it)) }
                 }
-            } else if (currentTab?.tabType in listOf(
-                    TabModel.Type.EPHEMERAL,
-                    TabModel.Type.POP_UP
-                )
-            ) {
+            } else if (currentTab?.tabType == TabModel.Type.EPHEMERAL) {
                 onTabClose(state.value.tabs.indexOfCurrentTab())
             } else {
                 navigator.backgroundBrowser()
