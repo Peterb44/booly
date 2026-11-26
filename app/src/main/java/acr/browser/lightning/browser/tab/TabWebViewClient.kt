@@ -345,8 +345,8 @@ class TabWebViewClient @AssistedInject constructor(
         val pageUrl = webView.url
         urlWithSslError = warningUrl
 
-        // A previous explicit approval applies to the whole site (its subdomains and the
-        // resources its pages load) for this app session only.
+        // A previous explicit approval applies to this exact hostname across app restarts.
+        // It is saved only after the user checks the opt-out box and confirms proceeding.
         if (sslWarningPreferences.recallBehaviorForDomain(warningUrl) ==
             SslWarningPreferences.Behavior.PROCEED ||
             sslWarningPreferences.recallBehaviorForDomain(pageUrl) ==
