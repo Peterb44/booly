@@ -22,7 +22,7 @@ class PersistentSslWarningPreferences @Inject constructor(
     )
 
     override fun recallBehaviorForDomain(url: String?): SslWarningPreferences.Behavior? {
-        val host = url.toUriOrNull()?.host?.lowercase() ?: return null
+        val host = url?.toUriOrNull()?.host?.lowercase() ?: return null
         return when (preferences.getString(KEY_PREFIX + host, null)) {
             BEHAVIOR_PROCEED -> SslWarningPreferences.Behavior.PROCEED
             BEHAVIOR_CANCEL -> SslWarningPreferences.Behavior.CANCEL
