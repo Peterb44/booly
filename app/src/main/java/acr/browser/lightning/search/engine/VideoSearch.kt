@@ -7,6 +7,6 @@ import acr.browser.lightning.R
  */
 class VideoSearch : BaseSearchEngine(
     "file:///android_asset/lightning.png",
-    "https://www.youtube.com/results?search_query=",
+    "https://www.google.com/search?tbm=vid&q=",
     R.string.search_engine_video
 )
