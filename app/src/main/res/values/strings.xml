@@ -363,4 +363,5 @@
     <string name="hide_videos">Hide videos</string>
     <string name="hide_videos_summary">Hide video players and embedded video media while preserving page layout.</string>
     <string name="action_translate_to_arabic">ترجمة إلى العربية</string>
+    <string name="search_engine_video">Video Search</string>
 </resources>
