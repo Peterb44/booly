@@ -11,9 +11,7 @@ import kotlinx.coroutines.Deferred
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserFactory
-import java.io.StringReader
+import org.json.JSONArray
 import java.nio.ByteBuffer
 import java.nio.charset.CharacterCodingException
 import java.nio.charset.Charset
@@ -47,57 +45,32 @@ class GoogleSuggestionsModel @Inject constructor(
         .scheme("https")
         .host("suggestqueries.google.com")
         .encodedPath("/complete/search")
-        .addQueryParameter("output", "toolbar")
-        .addQueryParameter("hl", language)
-        .addQueryParameter("ie", "utf-8")
-        .addQueryParameter("oe", "utf-8")
-        .addEncodedQueryParameter("q", query)
+        .addQueryParameter("output", "chrome")
+        .addQueryParameter("hl", if (query.containsArabicText()) "ar" else language)
+        .addQueryParameter("q", query)
         .build()
 
     @Throws(Exception::class)
     override fun parseResults(responseBody: ResponseBody): List<SearchSuggestion> {
-        // The server may answer in a legacy encoding (for example windows-1256 for Arabic) even
-        // when asked for UTF-8, so detect the encoding instead of assuming one.
-        val xml = decodeSuggestionBytes(responseBody.bytes(), responseBody.contentType()?.charset())
-        val parser = XmlPullParserFactory.newInstance().apply {
-            isNamespaceAware = true
-        }.newPullParser()
-        parser.setInput(StringReader(xml))
+        val json = JSONArray(responseBody.string())
+        if (json.length() < 2) return emptyList()
+        val suggestions = json.optJSONArray(1) ?: return emptyList()
 
-        val suggestions = mutableListOf<SearchSuggestion>()
-        var eventType = parser.eventType
-        while (eventType != XmlPullParser.END_DOCUMENT) {
-            if (eventType == XmlPullParser.START_TAG && "suggestion" == parser.name) {
-                val suggestion = parser.getAttributeValue(null, "data")
-                if (!suggestion.isNullOrBlank()) {
-                    suggestions.add(SearchSuggestion("$searchSubtitle \"$suggestion\"", suggestion))
+        return buildList {
+            for (index in 0 until suggestions.length()) {
+                val suggestion = suggestions.optString(index).trim()
+                if (suggestion.isNotEmpty()) {
+                    add(SearchSuggestion("$searchSubtitle \"$suggestion\"", suggestion))
                 }
             }
-            eventType = parser.next()
         }
-
-        return suggestions
     }
 
-    private fun decodeSuggestionBytes(bytes: ByteArray, declared: Charset?): String {
-        val candidates = mutableListOf<Charset>(Charsets.UTF_8)
-        if (declared != null && declared != Charsets.ISO_8859_1 && declared != Charsets.US_ASCII) {
-            candidates.add(declared)
-        }
-        runCatching { Charset.forName("windows-1256") }.getOrNull()?.let { candidates.add(it) }
-        candidates.add(Charsets.ISO_8859_1)
-
-        for (charset in candidates) {
-            try {
-                return charset.newDecoder()
-                    .onMalformedInput(CodingErrorAction.REPORT)
-                    .onUnmappableCharacter(CodingErrorAction.REPORT)
-                    .decode(ByteBuffer.wrap(bytes))
-                    .toString()
-            } catch (e: CharacterCodingException) {
-                // Try the next candidate.
-            }
-        }
-        return String(bytes, Charsets.UTF_8)
+    private fun String.containsArabicText(): Boolean = any { character ->
+        Character.UnicodeBlock.of(character) in setOf(
+            Character.UnicodeBlock.ARABIC,
+            Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_A,
+            Character.UnicodeBlock.ARABIC_PRESENTATION_FORMS_B
+        )
     }
 }
