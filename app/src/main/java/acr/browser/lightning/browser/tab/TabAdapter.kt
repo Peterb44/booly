@@ -320,7 +320,6 @@ class TabAdapter @AssistedInject constructor(
         // Apply the new User-Agent and viewport configuration immediately.
         // Without a reload, many responsive websites keep the mobile layout
         // that was selected during the previous page load.
-        settings.loadsImagesAutomatically = true
         webView().reload()
     }
 
