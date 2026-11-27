@@ -65,3 +65,5 @@ jobs:
           path: app/build/outputs/apk/lightningPlus/debug/*.apk
           if-no-files-found: error
           retention-days: 14
+
+# Trigger build for the latest desktop-mode fixes.
