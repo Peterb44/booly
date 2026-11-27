@@ -41,6 +41,7 @@ import acr.browser.lightning.resources.NumberFormatter
 import acr.browser.lightning.resources.ResourceProvider
 import acr.browser.lightning.search.SearchEngineProvider
 import acr.browser.lightning.search.SearchEngineChoice
+import acr.browser.lightning.search.SearchEngineChoice
 import acr.browser.lightning.search.engine.search
 import acr.browser.lightning.ssl.SslState
 import acr.browser.lightning.theme.ThemeProvider
@@ -196,6 +197,17 @@ class BrowserPresenter @Inject constructor(
 
                 tabCountNotifier.notifyTabCountChange(list.size)
             }
+        }
+    }
+
+    /** Return the currently selected search engine for the overflow menu. */
+    suspend fun getSelectedSearchEngineChoice(): SearchEngineChoice =
+        userPreferencesDataStore.searchChoice.get()
+
+    /** Update the search engine selected from the browser overflow menu. */
+    fun selectSearchEngine(choice: SearchEngineChoice) {
+        browserCoroutineScope.launch {
+            userPreferencesDataStore.searchChoice.set(choice)
         }
     }
 
