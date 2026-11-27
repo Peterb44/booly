@@ -41,7 +41,6 @@ import acr.browser.lightning.resources.NumberFormatter
 import acr.browser.lightning.resources.ResourceProvider
 import acr.browser.lightning.search.SearchEngineProvider
 import acr.browser.lightning.search.SearchEngineChoice
-import acr.browser.lightning.search.SearchEngineChoice
 import acr.browser.lightning.search.engine.search
 import acr.browser.lightning.ssl.SslState
 import acr.browser.lightning.theme.ThemeProvider
