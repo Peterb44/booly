@@ -1,6 +1,7 @@
 package acr.browser.lightning.browser.tab
 
 import acr.browser.lightning.R
+import acr.browser.lightning.constant.DESKTOP_USER_AGENT
 import acr.browser.lightning.adblock.AdBlocker
 import acr.browser.lightning.adblock.IndependentBlockLists
 import acr.browser.lightning.adblock.allowlist.AllowListModel
@@ -262,6 +263,31 @@ class TabWebViewClient @AssistedInject constructor(
     override fun onPageFinished(view: WebView, url: String) {
         super.onPageFinished(view, url)
         applyHideMedia(view)
+
+        // Desktop User-Agent alone does not guarantee a desktop-sized CSS viewport.
+        // Many mobile sites keep a width=device-width viewport meta tag, so replace
+        // it after each page load to make responsive layouts render at desktop width.
+        if (view.settings.userAgentString == DESKTOP_USER_AGENT) {
+            view.evaluateJavascript(
+                """
+                (function() {
+                    var viewport = document.querySelector('meta[name="viewport"]');
+                    if (!viewport) {
+                        viewport = document.createElement('meta');
+                        viewport.name = 'viewport';
+                        (document.head || document.documentElement).appendChild(viewport);
+                    }
+                    viewport.setAttribute(
+                        'content',
+                        'width=1280, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes'
+                    );
+                    document.documentElement.style.minWidth = '1280px';
+                    if (document.body) document.body.style.minWidth = '1280px';
+                })();
+                """.trimIndent(),
+                null
+            )
+        }
         tabCoroutineScope.launch {
             urlSharedFlow.emit(url)
             goBackSharedFlow.emit(view.canGoBack())
