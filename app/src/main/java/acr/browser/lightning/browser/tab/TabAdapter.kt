@@ -100,6 +100,9 @@ class TabAdapter @AssistedInject constructor(
 
     private var findInPageQuery: String? = null
     private var toggleDesktop: Boolean = false
+    private var originalUseWideViewPort: Boolean? = null
+    private var originalLoadWithOverviewMode: Boolean? = null
+    private var originalLayoutAlgorithm: android.webkit.WebSettings.LayoutAlgorithm? = null
     private val downloadsShareFlow = MutableSharedFlow<PendingDownload>()
     private val focusSharedFlow = MutableSharedFlow<Unit>()
     private val showHideFlow = MutableSharedFlow<Boolean>()
@@ -286,13 +289,33 @@ class TabAdapter @AssistedInject constructor(
     override fun canGoForwardChanges(): Flow<Boolean> = tabWebViewClient.goForwardSharedFlow
 
     override suspend fun toggleDesktopAgent() {
-        webView().settings.userAgentString = if (!toggleDesktop) {
-            DESKTOP_USER_AGENT
-        } else {
-            userAgentProvider.getUserAgent()
-        }
+        val settings = webView().settings
 
-        toggleDesktop = !toggleDesktop
+        if (!toggleDesktop) {
+            // Save the tab's normal rendering configuration so switching back
+            // restores the user's original mobile settings.
+            originalUseWideViewPort = settings.useWideViewPort
+            originalLoadWithOverviewMode = settings.loadWithOverviewMode
+            originalLayoutAlgorithm = settings.layoutAlgorithm
+
+            // A desktop user-agent alone is not enough: enable a wide layout
+            // viewport so responsive sites receive a desktop-sized CSS viewport.
+            settings.userAgentString = DESKTOP_USER_AGENT
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.layoutAlgorithm = android.webkit.WebSettings.LayoutAlgorithm.NORMAL
+            toggleDesktop = true
+        } else {
+            settings.userAgentString = userAgentProvider.getUserAgent()
+            settings.useWideViewPort = originalUseWideViewPort ?: settings.useWideViewPort
+            settings.loadWithOverviewMode =
+                originalLoadWithOverviewMode ?: settings.loadWithOverviewMode
+            originalLayoutAlgorithm?.let { settings.layoutAlgorithm = it }
+            originalUseWideViewPort = null
+            originalLoadWithOverviewMode = null
+            originalLayoutAlgorithm = null
+            toggleDesktop = false
+        }
     }
 
     override suspend fun reload() {
