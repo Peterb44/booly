@@ -5,6 +5,7 @@ import acr.browser.lightning.R
 import acr.browser.lightning.browser.BrowserComposeState
 import acr.browser.lightning.browser.BrowserPresenter
 import acr.browser.lightning.browser.menu.MenuSelection
+import acr.browser.lightning.search.SearchEngineChoice
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.rememberScrollState
@@ -14,8 +15,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +34,11 @@ import androidx.compose.ui.window.PopupProperties
 fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserComposeState) {
     Box {
         var dropDownExpanded by remember { mutableStateOf(false) }
+        var searchEnginesExpanded by remember { mutableStateOf(false) }
+        var selectedSearchEngine by remember { mutableStateOf(SearchEngineChoice.VIDEO) }
+        LaunchedEffect(presenter) {
+            selectedSearchEngine = presenter.getSelectedSearchEngineChoice()
+        }
         IconButton(onClick = {
             dropDownExpanded = !dropDownExpanded
         }) {
@@ -130,6 +138,36 @@ fun BrowserOverflowMenu(presenter: BrowserPresenter, browserViewState: BrowserCo
                 }
             )
 
+            DropdownMenuItem(
+                text = { DropdownText("محرك البحث") },
+                onClick = { searchEnginesExpanded = !searchEnginesExpanded },
+                trailingIcon = {
+                    Text(
+                        text = if (searchEnginesExpanded) "▴" else "▾",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            )
+            if (searchEnginesExpanded) {
+                SearchEngineChoice.entries.forEach { choice ->
+                    DropdownMenuItem(
+                        text = { DropdownText(choice.menuTitle()) },
+                        onClick = {
+                            selectedSearchEngine = choice
+                            presenter.selectSearchEngine(choice)
+                            searchEnginesExpanded = false
+                            dropDownExpanded = false
+                        },
+                        trailingIcon = {
+                            RadioButton(
+                                selected = selectedSearchEngine == choice,
+                                onClick = null
+                            )
+                        }
+                    )
+                }
+            }
+
             // Keep Ad Block available in the overflow menu and open the existing
             // dedicated ad-block settings screen when selected.
             DropdownMenuItem(
@@ -157,3 +195,18 @@ private fun DropdownText(text: String) = Text(
     text = text,
     style = MaterialTheme.typography.bodyMedium
 )
+
+private fun SearchEngineChoice.menuTitle(): String = when (this) {
+    SearchEngineChoice.CUSTOM -> "Custom URL"
+    SearchEngineChoice.VIDEO -> "بحث فيديو"
+    SearchEngineChoice.GOOGLE -> "Google"
+    SearchEngineChoice.BING -> "Bing"
+    SearchEngineChoice.YAHOO -> "Yahoo"
+    SearchEngineChoice.START_PAGE -> "StartPage"
+    SearchEngineChoice.DUCK -> "DuckDuckGo"
+    SearchEngineChoice.DUCK_LITE -> "DuckDuckGo Lite"
+    SearchEngineChoice.BAIDU -> "Baidu"
+    SearchEngineChoice.YANDEX -> "Yandex"
+    SearchEngineChoice.NAVER -> "Naver"
+    SearchEngineChoice.KAGI -> "Kagi"
+}
