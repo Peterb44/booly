@@ -12,10 +12,10 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import org.json.JSONArray
-import java.nio.ByteBuffer
 import java.nio.charset.CharacterCodingException
 import java.nio.charset.Charset
 import java.nio.charset.CodingErrorAction
+import java.net.URLDecoder
 import java.util.Locale
 import javax.inject.Inject
 
@@ -46,8 +46,8 @@ class GoogleSuggestionsModel @Inject constructor(
         .host("suggestqueries.google.com")
         .encodedPath("/complete/search")
         .addQueryParameter("output", "chrome")
-        .addQueryParameter("hl", if (query.containsArabicText()) "ar" else language)
-        .addQueryParameter("q", query)
+        .addQueryParameter("hl", if (URLDecoder.decode(query, UTF8).containsArabicText()) "ar" else language)
+        .addEncodedQueryParameter("q", query)
         .build()
 
     @Throws(Exception::class)
