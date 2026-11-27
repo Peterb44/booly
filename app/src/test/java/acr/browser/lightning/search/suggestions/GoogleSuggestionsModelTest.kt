@@ -34,6 +34,10 @@ class GoogleSuggestionsModelTest {
             FakeCoroutineDispatchers(testScheduler)
         )
 
+        val arabicQuery = "%D8%A7%D9%84%D8%B7%D9%82%D8%B3"
+        assertThat(suggestionsModel.createQueryUrl(arabicQuery, "en").toString())
+            .isEqualTo("https://suggestqueries.google.com/complete/search?output=chrome&hl=ar&q=$arabicQuery")
+
         (0..100).forEach {
             val result =
                 "https://suggestqueries.google.com/complete/search?output=chrome&hl=$it&q=$it"
